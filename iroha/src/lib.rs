@@ -26,6 +26,9 @@ pub mod torii;
 pub mod tx;
 pub mod wsv;
 
+#[macro_use]
+extern crate iroha_macro;
+
 use crate::{
     block_sync::{message::Message as BlockSyncMessage, BlockSynchronizer},
     config::Configuration,

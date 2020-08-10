@@ -137,13 +137,8 @@ impl Sumeragi {
                     }
                 }
                 send_futures.push(message.clone().send_to(self.network_topology.proxy_tail()));
-                let results = futures::future::join_all(send_futures).await;
-                results
-                    .iter()
-                    .filter(|result| result.is_err())
-                    .for_each(|error_result| {
-                        log::error!("Failed to send messages: {:?}", error_result)
-                    });
+                iter_log_error!(futures::future::join_all(send_futures).await,
+                    "Failed to send messages: {:?}");
                 Ok(())
             }
         } else {
@@ -192,29 +187,13 @@ impl Sumeragi {
                                 );
                             }
                         }
-                        let results = futures::future::join_all(send_futures).await;
-                        results
-                            .iter()
-                            .filter(|result| result.is_err())
-                            .for_each(|error_result| {
-                                log::error!(
-                                    "Failed to send transactions to the leader: {:?}",
-                                    error_result
-                                )
-                            });
+                        iter_log_error!(futures::future::join_all(send_futures).await,
+                            "Failed to send transactions to the leader: {:?}");
                     }
                 });
             }
-            let results = futures::future::join_all(send_futures).await;
-            results
-                .iter()
-                .filter(|result| result.is_err())
-                .for_each(|error_result| {
-                    log::error!(
-                        "Failed to send transactions to the leader: {:?}",
-                        error_result
-                    )
-                });
+            iter_log_error!(futures::future::join_all(send_futures).await,
+                "Failed to send transactions to the leader: {:?}");
             Ok(())
         }
     }
@@ -244,13 +223,8 @@ impl Sumeragi {
                             send_futures.push(message.clone().send_to(peer));
                         }
                     }
-                    let results = futures::future::join_all(send_futures).await;
-                    results
-                        .iter()
-                        .filter(|result| result.is_err())
-                        .for_each(|error_result| {
-                            log::error!("Failed to send messages: {:?}", error_result)
-                        });
+                    iter_log_error!(futures::future::join_all(send_futures).await,
+                        "Failed to send messages: {:?}");
                 }
             }
         });
@@ -699,13 +673,8 @@ pub mod message {
                     for peer in sumeragi.network_topology.peers_set_b() {
                         send_futures.push(message.clone().send_to(peer));
                     }
-                    let results = futures::future::join_all(send_futures).await;
-                    results
-                        .iter()
-                        .filter(|result| result.is_err())
-                        .for_each(|error_result| {
-                            log::error!("Failed to send messages: {:?}", error_result)
-                        });
+                    iter_log_error!(futures::future::join_all(send_futures).await,
+                        "Failed to send messages: {:?}");
                     sumeragi.votes_for_blocks.clear();
                     sumeragi.commit_block(block).await;
                 }
@@ -1122,13 +1091,8 @@ pub mod message {
                         for peer in &sumeragi.network_topology.sorted_peers {
                             send_futures.push(message.clone().send_to(peer));
                         }
-                        let results = futures::future::join_all(send_futures).await;
-                        results
-                            .iter()
-                            .filter(|result| result.is_err())
-                            .for_each(|error_result| {
-                                log::error!("Failed to send messages: {:?}", error_result)
-                            });
+                        iter_log_error!(futures::future::join_all(send_futures).await,
+                            "Failed to send messages: {:?}");
                     }
                 }
             }
