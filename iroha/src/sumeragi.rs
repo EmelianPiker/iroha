@@ -9,14 +9,12 @@ use crate::{
     peer::PeerId,
     prelude::*,
 };
-use async_std::sync::RwLock;
 use iroha_crypto::{Hash, KeyPair};
 use iroha_derive::*;
 use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 use std::{
     collections::{BTreeMap, BTreeSet},
     fmt::{self, Debug, Formatter},
-    sync::Arc,
     time::{Duration, SystemTime},
 };
 
@@ -31,17 +29,17 @@ pub struct Sumeragi {
     pub network_topology: InitializedNetworkTopology,
     peer_id: PeerId,
     /// The block in discussion this round, received from a leader.
-    voting_block: Arc<RwLock<Option<VotingBlock>>>,
+    voting_block: Shared<Option<VotingBlock>>,
     /// This field is used to count votes when the peer is a proxy tail role.
     votes_for_blocks: BTreeMap<Hash, ValidBlock>,
-    blocks_sender: Arc<RwLock<ValidBlockSender>>,
+    blocks_sender: Shared<ValidBlockSender>,
     events_sender: EventsSender,
     transactions_sender: TransactionSender,
-    world_state_view: Arc<RwLock<WorldStateView>>,
+    world_state_view: Shared<WorldStateView>,
     /// Hashes of the transactions that were forwarded to a leader, but not yet confirmed with a receipt.
-    transactions_awaiting_receipts: Arc<RwLock<BTreeSet<Hash>>>,
+    transactions_awaiting_receipts: Shared<BTreeSet<Hash>>,
     /// Hashes of the transactions that were accepted by the leader and are waiting to be stored in CreatedBlock.
-    transactions_awaiting_created_block: Arc<RwLock<BTreeSet<Hash>>>,
+    transactions_awaiting_created_block: Shared<BTreeSet<Hash>>,
     commit_time: Duration,
     tx_receipt_time: Duration,
     block_time: Duration,
@@ -57,9 +55,9 @@ impl Sumeragi {
     /// Default `Sumeragi` constructor.
     pub fn from_configuration(
         configuration: &config::SumeragiConfiguration,
-        blocks_sender: Arc<RwLock<ValidBlockSender>>,
+        blocks_sender: Shared<ValidBlockSender>,
         events_sender: EventsSender,
-        world_state_view: Arc<RwLock<WorldStateView>>,
+        world_state_view: Shared<WorldStateView>,
         transactions_sender: TransactionSender,
         latest_block_hash: Hash,
         block_height: u64,
@@ -74,13 +72,13 @@ impl Sumeragi {
             )
             .init()?,
             peer_id: configuration.peer_id.clone(),
-            voting_block: Arc::new(RwLock::new(None)),
+            voting_block: Shared::new(None),
             votes_for_blocks: BTreeMap::new(),
             blocks_sender,
             events_sender,
             world_state_view,
-            transactions_awaiting_receipts: Arc::new(RwLock::new(BTreeSet::new())),
-            transactions_awaiting_created_block: Arc::new(RwLock::new(BTreeSet::new())),
+            transactions_awaiting_receipts: Shared::new(BTreeSet::new()),
+            transactions_awaiting_created_block: Shared::new(BTreeSet::new()),
             commit_time: Duration::from_millis(configuration.commit_time_ms),
             transactions_sender,
             tx_receipt_time: Duration::from_millis(configuration.tx_receipt_time_ms),
@@ -1385,7 +1383,7 @@ mod tests {
                 public_key: key_pair.public_key,
             };
             ids.push(peer_id);
-            block_counters.push(Arc::new(RwLock::new(0)));
+            block_counters.push(Shared::new(0));
         }
         let mut peers = Vec::new();
         let mut config =
@@ -1401,7 +1399,7 @@ mod tests {
             let (sumeragi_message_sender, mut sumeragi_message_receiver) = sync::channel(100);
             let (block_sync_message_sender, _) = sync::channel(100);
             let (events_sender, events_receiver) = sync::channel(100);
-            let wsv = Arc::new(RwLock::new(WorldStateView::new(Peer::new(
+            let wsv = Shared::new(WorldStateView::new(Peer::new(
                 PeerId {
                     address: "127.0.0.1:7878".to_string(),
                     public_key: KeyPair::generate()
@@ -1409,7 +1407,7 @@ mod tests {
                         .public_key,
                 },
                 &ids,
-            ))));
+            )));
             let mut torii = Torii::new(
                 (
                     ids[i].address.as_str(),
@@ -1432,7 +1430,7 @@ mod tests {
             config.public_key = ids[i].public_key.clone();
             config.torii_configuration.torii_url = ids[i].address.clone();
             config.sumeragi_configuration.trusted_peers(ids.clone());
-            let sumeragi = Arc::new(RwLock::new(
+            let sumeragi = Shared::new(
                 Sumeragi::from_configuration(
                     &config.sumeragi_configuration,
                     Arc::new(RwLock::new(block_sender)),
@@ -1443,7 +1441,7 @@ mod tests {
                     0,
                 )
                 .expect("Failed to create Sumeragi."),
-            ));
+            );
             peers.push(sumeragi.clone());
             task::spawn(async move {
                 while let Some(message) = sumeragi_message_receiver.next().await {
@@ -1502,7 +1500,7 @@ mod tests {
                 public_key: key_pair.public_key,
             };
             ids.push(peer_id);
-            block_counters.push(Arc::new(RwLock::new(0)));
+            block_counters.push(Shared::new(0));
         }
         let mut peers = Vec::new();
         let mut config =
@@ -1518,7 +1516,7 @@ mod tests {
             let (block_sync_message_sender, _) = sync::channel(100);
             let (transactions_sender, _transactions_receiver) = sync::channel(100);
             let (events_sender, events_receiver) = sync::channel(100);
-            let wsv = Arc::new(RwLock::new(WorldStateView::new(Peer::new(
+            let wsv = Shared::new(WorldStateView::new(Peer::new(
                 PeerId {
                     address: "127.0.0.1:7878".to_string(),
                     public_key: KeyPair::generate()
@@ -1526,7 +1524,7 @@ mod tests {
                         .public_key,
                 },
                 &ids,
-            ))));
+            )));
             let mut torii = Torii::new(
                 (
                     ids[i].address.as_str(),
@@ -1549,7 +1547,7 @@ mod tests {
             config.public_key = ids[i].public_key.clone();
             config.torii_configuration.torii_url = ids[i].address.clone();
             config.sumeragi_configuration.trusted_peers(ids.clone());
-            let sumeragi = Arc::new(RwLock::new(
+            let sumeragi = Shared::new(
                 Sumeragi::from_configuration(
                     &config.sumeragi_configuration,
                     Arc::new(RwLock::new(block_sender)),
@@ -1560,7 +1558,7 @@ mod tests {
                     0,
                 )
                 .expect("Failed to create Sumeragi."),
-            ));
+            );
             peers.push(sumeragi.clone());
             task::spawn(async move {
                 while let Some(message) = sumeragi_message_receiver.next().await {
@@ -1643,7 +1641,7 @@ mod tests {
                 public_key: key_pair.public_key,
             };
             ids.push(peer_id);
-            block_counters.push(Arc::new(RwLock::new(0)));
+            block_counters.push(Shared::new(0));
         }
         let mut peers = Vec::new();
         let mut config =
@@ -1658,7 +1656,7 @@ mod tests {
             let (block_sync_message_sender, _) = sync::channel(100);
             let (transactions_sender, mut transactions_receiver) = sync::channel(100);
             let (events_sender, events_receiver) = sync::channel(100);
-            let wsv = Arc::new(RwLock::new(WorldStateView::new(Peer::new(
+            let wsv = Shared::new(WorldStateView::new(Peer::new(
                 PeerId {
                     address: "127.0.0.1:7878".to_string(),
                     public_key: KeyPair::generate()
@@ -1666,7 +1664,7 @@ mod tests {
                         .public_key,
                 },
                 &ids,
-            ))));
+            )));
             let mut torii = Torii::new(
                 (
                     ids[i].address.as_str(),
@@ -1689,7 +1687,7 @@ mod tests {
             config.public_key = ids[i].public_key.clone();
             config.torii_configuration.torii_url = ids[i].address.clone();
             config.sumeragi_configuration.trusted_peers(ids.clone());
-            let sumeragi = Arc::new(RwLock::new(
+            let sumeragi = Shared::new(
                 Sumeragi::from_configuration(
                     &config.sumeragi_configuration,
                     Arc::new(RwLock::new(block_sender)),
@@ -1700,7 +1698,7 @@ mod tests {
                     0,
                 )
                 .expect("Failed to create Sumeragi."),
-            ));
+            );
             peers.push(sumeragi.clone());
             let sumeragi_arc_clone = sumeragi.clone();
             task::spawn(async move {
@@ -1794,7 +1792,7 @@ mod tests {
                 public_key: key_pair.public_key,
             };
             ids.push(peer_id);
-            block_counters.push(Arc::new(RwLock::new(0)));
+            block_counters.push(Shared::new(0));
         }
         let mut peers = Vec::new();
         let mut config =
@@ -1809,7 +1807,7 @@ mod tests {
             let (block_sync_message_sender, _) = sync::channel(100);
             let (transactions_sender, mut transactions_receiver) = sync::channel(100);
             let (events_sender, events_receiver) = sync::channel(100);
-            let wsv = Arc::new(RwLock::new(WorldStateView::new(Peer::new(
+            let wsv = Shared::new(WorldStateView::new(Peer::new(
                 PeerId {
                     address: "127.0.0.1:7878".to_string(),
                     public_key: KeyPair::generate()
@@ -1817,7 +1815,7 @@ mod tests {
                         .public_key,
                 },
                 &ids,
-            ))));
+            )));
             let mut torii = Torii::new(
                 (
                     ids[i].address.as_str(),
@@ -1840,7 +1838,7 @@ mod tests {
             config.public_key = ids[i].public_key.clone();
             config.torii_configuration.torii_url = ids[i].address.clone();
             config.sumeragi_configuration.trusted_peers(ids.clone());
-            let sumeragi = Arc::new(RwLock::new(
+            let sumeragi = Shared::new(
                 Sumeragi::from_configuration(
                     &config.sumeragi_configuration,
                     Arc::new(RwLock::new(block_sender)),
@@ -1851,7 +1849,7 @@ mod tests {
                     0,
                 )
                 .expect("Failed to create Sumeragi."),
-            ));
+            );
             peers.push(sumeragi.clone());
             let sumeragi_arc_clone = sumeragi.clone();
             task::spawn(async move {
@@ -1942,7 +1940,7 @@ mod tests {
                 public_key: key_pair.public_key,
             };
             ids.push(peer_id);
-            block_counters.push(Arc::new(RwLock::new(0)));
+            block_counters.push(Shared::new(0));
         }
         let mut peers = Vec::new();
         let mut config =
@@ -1958,7 +1956,7 @@ mod tests {
             let (block_sync_message_sender, _) = sync::channel(100);
             let (transactions_sender, _transactions_receiver) = sync::channel(100);
             let (events_sender, events_receiver) = sync::channel(100);
-            let wsv = Arc::new(RwLock::new(WorldStateView::new(Peer::new(
+            let wsv = Shared::new(WorldStateView::new(Peer::new(
                 PeerId {
                     address: "127.0.0.1:7878".to_string(),
                     public_key: KeyPair::generate()
@@ -1966,7 +1964,7 @@ mod tests {
                         .public_key,
                 },
                 &ids,
-            ))));
+            )));
             let mut torii = Torii::new(
                 (
                     ids[i].address.as_str(),
@@ -1989,7 +1987,7 @@ mod tests {
             config.public_key = ids[i].public_key.clone();
             config.torii_configuration.torii_url = ids[i].address.clone();
             config.sumeragi_configuration.trusted_peers(ids.clone());
-            let sumeragi = Arc::new(RwLock::new(
+            let sumeragi = Shared::new(
                 Sumeragi::from_configuration(
                     &config.sumeragi_configuration,
                     Arc::new(RwLock::new(block_sender)),
@@ -2000,7 +1998,7 @@ mod tests {
                     0,
                 )
                 .expect("Failed to create Sumeragi."),
-            ));
+            );
             peers.push(sumeragi.clone());
             task::spawn(async move {
                 while let Some(message) = sumeragi_message_receiver.next().await {

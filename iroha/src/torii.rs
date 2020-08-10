@@ -12,7 +12,7 @@ use crate::{
     sumeragi::message::Message as SumeragiMessage,
     BlockSyncMessageSender, SumeragiMessageSender,
 };
-use async_std::{prelude::*, sync::RwLock, task};
+use async_std::{prelude::*, task};
 use iroha_derive::*;
 #[cfg(feature = "mock")]
 use iroha_network::mock::prelude::*;
@@ -24,11 +24,11 @@ use std::{convert::TryFrom, fmt::Debug, sync::Arc};
 pub struct Torii {
     url: String,
     connect_url: String,
-    world_state_view: Arc<RwLock<WorldStateView>>,
-    transaction_sender: Arc<RwLock<TransactionSender>>,
-    sumeragi_message_sender: Arc<RwLock<SumeragiMessageSender>>,
-    block_sync_message_sender: Arc<RwLock<BlockSyncMessageSender>>,
-    system: Arc<RwLock<System>>,
+    world_state_view: Shared<WorldStateView>,
+    transaction_sender: Shared<TransactionSender>,
+    sumeragi_message_sender: Shared<SumeragiMessageSender>,
+    block_sync_message_sender: Shared<BlockSyncMessageSender>,
+    system: Shared<System>,
     events_sender: EventsSender,
     events_receiver: EventsReceiver,
 }
@@ -37,7 +37,7 @@ impl Torii {
     /// Default `Torii` constructor.
     pub fn new(
         (url, connect_url): (&str, &str),
-        world_state_view: Arc<RwLock<WorldStateView>>,
+        world_state_view: Shared<WorldStateView>,
         transaction_sender: TransactionSender,
         sumeragi_message_sender: SumeragiMessageSender,
         block_sync_message_sender: BlockSyncMessageSender,
@@ -48,10 +48,10 @@ impl Torii {
             url: url.to_string(),
             connect_url: connect_url.to_string(),
             world_state_view,
-            transaction_sender: Arc::new(RwLock::new(transaction_sender)),
-            sumeragi_message_sender: Arc::new(RwLock::new(sumeragi_message_sender)),
-            block_sync_message_sender: Arc::new(RwLock::new(block_sync_message_sender)),
-            system: Arc::new(RwLock::new(system)),
+            transaction_sender: Shared::new(transaction_sender),
+            sumeragi_message_sender: Shared::new(sumeragi_message_sender),
+            block_sync_message_sender: Shared::new(block_sync_message_sender),
+            system: Shared::new(system),
             events_sender,
             events_receiver,
         }
@@ -60,7 +60,7 @@ impl Torii {
     /// Construct `Torii` from `ToriiConfiguration`.
     pub fn from_configuration(
         configuration: &config::ToriiConfiguration,
-        world_state_view: Arc<RwLock<WorldStateView>>,
+        world_state_view: Shared<WorldStateView>,
         transaction_sender: TransactionSender,
         sumeragi_message_sender: SumeragiMessageSender,
         block_sync_message_sender: BlockSyncMessageSender,
@@ -80,12 +80,12 @@ impl Torii {
 
     /// To handle incoming requests `Torii` should be started first.
     pub async fn start(&mut self) -> Result<(), String> {
-        let world_state_view = Arc::clone(&self.world_state_view);
-        let transaction_sender = Arc::clone(&self.transaction_sender);
-        let sumeragi_message_sender = Arc::clone(&self.sumeragi_message_sender);
-        let block_sync_message_sender = Arc::clone(&self.block_sync_message_sender);
-        let system = Arc::clone(&self.system);
-        let connections = Arc::new(RwLock::new(Vec::new()));
+        let world_state_view = Shared::clone(&self.world_state_view);
+        let transaction_sender = Shared::clone(&self.transaction_sender);
+        let sumeragi_message_sender = Shared::clone(&self.sumeragi_message_sender);
+        let block_sync_message_sender = Shared::clone(&self.block_sync_message_sender);
+        let system = Shared::clone(&self.system);
+        let connections = Shared::new(Vec::new());
         let state = ToriiState {
             world_state_view,
             transaction_sender,
@@ -95,10 +95,10 @@ impl Torii {
             consumers: connections.clone(),
             events_sender: self.events_sender.clone(),
         };
-        let state = Arc::new(RwLock::new(state));
+        let state = Shared::new(state);
         let (handle_requests_result, handle_connects_result, _event_consumer_result) = futures::join!(
-            Network::listen(state.clone(), &self.url, handle_requests),
-            Network::listen(state.clone(), &self.connect_url, handle_connections),
+            Network::listen(state.0.clone(), &self.url, handle_requests),
+            Network::listen(state.0.clone(), &self.connect_url, handle_connections),
             consume_events(self.events_receiver.clone(), connections)
         );
         handle_requests_result?;
@@ -109,12 +109,12 @@ impl Torii {
 
 #[derive(Debug)]
 struct ToriiState {
-    world_state_view: Arc<RwLock<WorldStateView>>,
-    transaction_sender: Arc<RwLock<TransactionSender>>,
-    sumeragi_message_sender: Arc<RwLock<SumeragiMessageSender>>,
-    block_sync_message_sender: Arc<RwLock<BlockSyncMessageSender>>,
-    consumers: Arc<RwLock<Vec<Consumer>>>,
-    system: Arc<RwLock<System>>,
+    world_state_view: Shared<WorldStateView>,
+    transaction_sender: Shared<TransactionSender>,
+    sumeragi_message_sender: Shared<SumeragiMessageSender>,
+    block_sync_message_sender: Shared<BlockSyncMessageSender>,
+    consumers: Shared<Vec<Consumer>>,
+    system: Shared<System>,
     events_sender: EventsSender,
 }
 
@@ -134,7 +134,7 @@ async fn handle_requests(
 
 async fn consume_events(
     mut events_receiver: EventsReceiver,
-    consumers: Arc<RwLock<Vec<Consumer>>>,
+    consumers: Shared<Vec<Consumer>>,
 ) {
     while let Some(change) = events_receiver.next().await {
         log::trace!("Event occurred: {:?}", change);
@@ -366,10 +366,10 @@ mod tests {
         let (events_sender, events_receiver) = sync::channel(100);
         let mut torii = Torii::new(
             (&torii_url, &torii_connect_url),
-            Arc::new(RwLock::new(WorldStateView::new(Peer::new(
+            Shared::new(WorldStateView::new(Peer::new(
                 PeerId::new(&config.torii_configuration.torii_url, &config.public_key),
                 &Vec::new(),
-            )))),
+            ))),
             tx_tx,
             sumeragi_message_sender,
             block_sync_message_sender,

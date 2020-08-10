@@ -7,9 +7,11 @@ use crate::{
     peer::PeerId,
     sumeragi::{Role, Sumeragi},
 };
-use async_std::{sync::RwLock, task};
+use async_std::task;
 use iroha_derive::*;
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
+
+use crate::prelude::*;
 
 /// The state of `BlockSynchronizer`.
 #[derive(Clone, Debug)]
@@ -24,8 +26,8 @@ enum State {
 /// Structure responsible for block synchronization between peers.
 #[derive(Debug)]
 pub struct BlockSynchronizer {
-    kura: Arc<RwLock<Kura>>,
-    sumeragi: Arc<RwLock<Sumeragi>>,
+    kura: Shared<Kura>,
+    sumeragi: Shared<Sumeragi>,
     peer_id: PeerId,
     state: State,
     gossip_period: Duration,
@@ -36,8 +38,8 @@ impl BlockSynchronizer {
     /// Constructs `BlockSync`
     pub fn from_configuration(
         config: &BlockSyncConfiguration,
-        kura: Arc<RwLock<Kura>>,
-        sumeragi: Arc<RwLock<Sumeragi>>,
+        kura: Shared<Kura>,
+        sumeragi: Shared<Sumeragi>,
         peer_id: PeerId,
     ) -> BlockSynchronizer {
         Self {
