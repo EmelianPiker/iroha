@@ -2,7 +2,7 @@
 pub mod mock;
 
 use async_std::{
-    net::{TcpListener, TcpStream},
+    //net::{TcpListener, TcpStream},
     prelude::*,
     sync::RwLock,
 };
@@ -13,7 +13,7 @@ use std::{
     error::Error,
     future::Future,
     io::{prelude::*, ErrorKind},
-    net::TcpStream as SyncTcpStream,
+    //net::TcpStream as SyncTcpStream,
     sync::Arc,
     time::Duration,
 };
@@ -57,6 +57,8 @@ impl Network {
     /// Establishes connection to server on `server_url`, sends `request` closes connection and returns `Response`.
     #[log]
     pub async fn send_request_to(server_url: &str, request: Request) -> Result<Response, String> {
+        panic!("not implemented in wasm");
+        /*
         async_std::io::timeout(Duration::from_millis(REQUEST_TIMEOUT_MILLIS), async {
             let mut stream = TcpStream::connect(server_url).await?;
             let payload: Vec<u8> = request.into();
@@ -68,6 +70,7 @@ impl Network {
         })
         .await
         .map_err(|e| e.to_string())?
+        */
     }
 
     /// Listens on the specified `server_url`.
@@ -86,6 +89,8 @@ impl Network {
         H: FnMut(State<S>, Box<dyn AsyncStream>) -> F,
         F: Future<Output = Result<(), String>>,
     {
+        panic!("not implemented in wasm");
+        /*
         let listener = TcpListener::bind(server_url)
             .await
             .map_err(|e| e.to_string())?;
@@ -97,6 +102,7 @@ impl Network {
             .await?;
         }
         Ok(())
+        */
     }
 
     /// Helper function to call inside `listen` `handler` function to parse and send response.
@@ -135,7 +141,9 @@ impl Network {
 }
 
 pub struct Connection {
+/* FIXME WASM
     tcp_stream: SyncTcpStream,
+*/
 }
 
 /// `Receipt` should be used by [Consumers](https://github.com/cloudevents/spec/blob/v1.0/spec.md#consumer)
@@ -148,6 +156,8 @@ pub enum Receipt {
 
 impl Connection {
     fn connect(address: &str, timeout_millis: u64, initial_message: &[u8]) -> Result<Self, String> {
+        panic!("not implemented in wasm");
+        /*
         let mut tcp_stream: SyncTcpStream =
             SyncTcpStream::connect(address).map_err(|e| e.to_string())?;
         tcp_stream
@@ -163,6 +173,7 @@ impl Connection {
             .flush()
             .expect("Failed to flush initial message.");
         Ok(Connection { tcp_stream })
+        */
     }
 }
 
@@ -170,6 +181,8 @@ impl Iterator for Connection {
     type Item = Vec<u8>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        panic!("not implemented in wasm");
+        /*
         let mut buffer = [0u8; BUFFER_SIZE];
         loop {
             match self.tcp_stream.read(&mut buffer) {
@@ -196,6 +209,7 @@ impl Iterator for Connection {
                 }
             }
         }
+        */
     }
 }
 
