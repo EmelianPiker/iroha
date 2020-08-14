@@ -11,7 +11,7 @@ use iroha_derive::*;
 use serde::Deserialize;
 use std::{
     convert::TryFrom,
-    fs,
+    //fs, FIXME WASM
     path::{Path, PathBuf},
 };
 
@@ -151,12 +151,15 @@ struct BlockStore {
 
 impl BlockStore {
     fn new(path: &Path) -> BlockStore {
+        panic!("not implemented in wasm");
+        /*
         if fs::read_dir(path).is_err() {
             fs::create_dir_all(path).expect("Failed to create Block Store directory.");
         }
         BlockStore {
             path: path.to_path_buf(),
         }
+        */
     }
 
     fn with_genesis_block(path: &Path, genesis_block: ValidBlock) -> BlockStore {
