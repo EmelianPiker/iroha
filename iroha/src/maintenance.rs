@@ -24,7 +24,7 @@ impl System {
     /// Scrape current system metrics.
     pub fn scrape_metrics(&self) -> Result<Metrics, String> {
         let mut metrics = Metrics::new(&self.configuration);
-        metrics.calculate()?;
+        //metrics.calculate()?;
         Ok(metrics)
     }
 }
@@ -43,11 +43,16 @@ pub enum Health {
 /// systems.
 #[derive(Clone, Debug, Default, Io, Encode, Decode)]
 pub struct Metrics {
-    cpu: cpu::Cpu,
-    disk: disk::Disk,
-    memory: memory::Memory,
+    //cpu: cpu::Cpu,
+    //disk: disk::Disk,
+    //memory: memory::Memory,
 }
 
+impl Metrics {
+    pub fn new(_: &Configuration) -> Self { Metrics {} }
+}
+
+/*
 impl Metrics {
     /// Default `Metrics` constructor.
     pub fn new(configuration: &Configuration) -> Self {
@@ -189,3 +194,4 @@ mod memory {
         }
     }
 }
+*/
