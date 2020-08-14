@@ -171,6 +171,8 @@ impl Sumeragi {
                 let transaction_hash = transaction.hash();
                 let peer_id = self.peer_id.clone();
                 let tx_receipt_time = self.tx_receipt_time;
+                panic!("wasm");
+                /*
                 async_std::task::spawn(async move {
                     async_std::task::sleep(tx_receipt_time).await;
                     if transactions_awaiting_receipts
@@ -191,6 +193,7 @@ impl Sumeragi {
                             "Failed to send transactions to the leader: {:?}");
                     }
                 });
+                */
             }
             iter_log_error!(futures::future::join_all(send_futures).await,
                 "Failed to send transactions to the leader: {:?}");
@@ -207,6 +210,8 @@ impl Sumeragi {
         let recipient_peers = self.network_topology.sorted_peers.clone();
         let peer_id = self.peer_id.clone();
         let commit_time = self.commit_time;
+        panic!("wasm");
+        /*
         async_std::task::spawn(async move {
             async_std::task::sleep(commit_time).await;
             if let Some(voting_block) = voting_block.write().await.clone() {
@@ -228,6 +233,7 @@ impl Sumeragi {
                 }
             }
         });
+        */
     }
 
     /// Commits `ValidBlock` and changes the state of the `Sumeragi` and its `NetworkTopology`.
@@ -884,6 +890,8 @@ pub mod message {
                     .clone()
                     .sign(&sumeragi.key_pair)
                     .expect("Failed to sign.");
+                panic!("wasm");
+                /*
                 async_std::task::spawn(async move {
                     async_std::task::sleep(tx_receipt_time).await;
                     if pending_forwarded_tx_hashes
@@ -901,6 +909,7 @@ pub mod message {
                         futures::future::join_all(send_futures).await;
                     }
                 });
+                */
             }
             Ok(())
         }
@@ -1014,6 +1023,8 @@ pub mod message {
                     .await
                     .insert(tx_hash);
                 let recipient_peers = sumeragi.network_topology.sorted_peers.clone();
+                panic!("wasm");
+                /*
                 async_std::task::spawn(async move {
                     async_std::task::sleep(block_time).await;
                     // Suspect leader if the block was not yet created
@@ -1032,6 +1043,7 @@ pub mod message {
                         .await;
                     }
                 });
+                */
             }
             Ok(())
         }
@@ -1384,9 +1396,12 @@ mod tests {
                 System::new(&config),
                 (events_sender.clone(), events_receiver),
             );
+            panic!("wasm");
+            /*
             task::spawn(async move {
                 torii.start().await.expect("Torii failed.");
             });
+            */
             let mut config = config.clone();
             config.sumeragi_configuration.key_pair = keys[i].clone();
             config.sumeragi_configuration.peer_id = ids[i].clone();
@@ -1407,6 +1422,8 @@ mod tests {
                 .expect("Failed to create Sumeragi."),
             );
             peers.push(sumeragi.clone());
+            panic!("wasm");
+            /*
             task::spawn(async move {
                 while let Some(message) = sumeragi_message_receiver.next().await {
                     let _result = message.handle(&mut *sumeragi.write().await).await;
@@ -1418,6 +1435,7 @@ mod tests {
                     *block_counter.write().await += 1;
                 }
             });
+            */
         }
         async_std::task::sleep(Duration::from_millis(2000)).await;
         // First peer is a leader in this particular case.
@@ -1501,9 +1519,12 @@ mod tests {
                 System::new(&config),
                 (events_sender.clone(), events_receiver),
             );
+            panic!("wasm");
+            /*
             task::spawn(async move {
                 torii.start().await.expect("Torii failed.");
             });
+            */
             let mut config = config.clone();
             config.sumeragi_configuration.key_pair = keys[i].clone();
             config.sumeragi_configuration.peer_id = ids[i].clone();
@@ -1524,6 +1545,8 @@ mod tests {
                 .expect("Failed to create Sumeragi."),
             );
             peers.push(sumeragi.clone());
+            panic!("wasm");
+            /*
             task::spawn(async move {
                 while let Some(message) = sumeragi_message_receiver.next().await {
                     let mut sumeragi = sumeragi.write().await;
@@ -1542,7 +1565,10 @@ mod tests {
                     *block_counter.write().await += 1;
                 }
             });
+            */
         }
+        panic!("wasm");
+        /*
         async_std::task::sleep(Duration::from_millis(2000)).await;
         // First peer is a leader in this particular case.
         let leader = peers
@@ -1587,6 +1613,7 @@ mod tests {
             );
             assert_eq!(peer.write().await.invalidated_blocks_hashes.len(), 1);
         }
+        */
     }
 
     #[cfg(feature = "network-mock")]
@@ -1641,6 +1668,8 @@ mod tests {
                 System::new(&config),
                 (events_sender.clone(), events_receiver),
             );
+            panic!("wasm");
+            /*
             task::spawn(async move {
                 torii.start().await.expect("Torii failed.");
             });
@@ -1696,7 +1725,10 @@ mod tests {
                     }
                 }
             });
+            */
         }
+        panic!("wasm");
+        /*
         async_std::task::sleep(Duration::from_millis(2000)).await;
         let peer = peers
             .iter()
@@ -1738,6 +1770,7 @@ mod tests {
                 order_after_change
             );
         }
+        */
     }
 
     #[cfg(feature = "network-mock")]
@@ -1792,6 +1825,8 @@ mod tests {
                 System::new(&config),
                 (events_sender.clone(), events_receiver),
             );
+            panic!("wasm");
+            /*
             task::spawn(async move {
                 torii.start().await.expect("Torii failed.");
             });
@@ -1844,6 +1879,7 @@ mod tests {
                     }
                 }
             });
+            */
         }
         async_std::task::sleep(Duration::from_millis(2000)).await;
         let peer = peers
@@ -1941,6 +1977,8 @@ mod tests {
                 System::new(&config),
                 (events_sender.clone(), events_receiver),
             );
+            panic!("wasm");
+            /*
             task::spawn(async move {
                 torii.start().await.expect("Torii failed.");
             });
@@ -1985,7 +2023,10 @@ mod tests {
                     *block_counter.write().await += 1;
                 }
             });
+            */
         }
+        panic!("wasm");
+        /*
         async_std::task::sleep(Duration::from_millis(2000)).await;
         let leader = peers
             .iter()
@@ -2029,5 +2070,6 @@ mod tests {
             );
             assert_eq!(peer.write().await.invalidated_blocks_hashes.len(), 1);
         }
+        */
     }
 }
