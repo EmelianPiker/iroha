@@ -122,6 +122,8 @@ async fn handle_requests(
     state: State<ToriiState>,
     stream: Box<dyn AsyncStream>,
 ) -> Result<(), String> {
+    panic!("not implemented in wasm");
+    /*
     let state_arc = Arc::clone(&state);
     task::spawn(async {
         if let Err(e) = Network::handle_message_async(state_arc, stream, handle_request).await {
@@ -130,6 +132,7 @@ async fn handle_requests(
     })
     .await;
     Ok(())
+    */
 }
 
 async fn consume_events(

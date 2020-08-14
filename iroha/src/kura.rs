@@ -163,10 +163,13 @@ impl BlockStore {
     }
 
     fn with_genesis_block(path: &Path, genesis_block: ValidBlock) -> BlockStore {
+        panic!("not compatible with wasm");
+        /*
         let block_store = BlockStore::new(path);
         task::block_on(async { block_store.write(&genesis_block).await })
             .expect("Failed to write a Genesis Block.");
         block_store
+        */
     }
 
     fn get_block_filename(block_height: u64) -> String {
