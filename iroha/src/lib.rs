@@ -185,6 +185,8 @@ impl Iroha {
     #[allow(clippy::eval_order_dependence)]
     pub async fn start(&self) -> Result<(), String> {
         //TODO: ensure the initialization order of `Kura` and `WSV`.
+        panic!("not implemented in wasm");
+        /*
         let kura = Shared::clone(&self.kura);
         kura.write().await.init().await?;
         let world_state_view = Shared::clone(&self.world_state_view);
@@ -270,6 +272,7 @@ impl Iroha {
             block_sync_message_handle,
         );
         Ok(())
+            */
     }
 }
 
