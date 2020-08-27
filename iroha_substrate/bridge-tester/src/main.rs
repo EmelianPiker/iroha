@@ -10,7 +10,10 @@ use iroha_client::{
     config::Configuration,
 };
 use sp_core::crypto::Pair;
+//use sp_core::{Pair, Public, sr25519};
+//use sp_core::{Public};
 use sp_runtime::AccountId32;
+//use sp_runtime::traits::{Verify};
 
 use iroha::asset::query::GetAccountAssetsResult;
 use iroha::permission::Permission::Anything;
@@ -47,14 +50,19 @@ fn check_response_assets(response: &QueryResult, expected_xor_amount: u32) {
     }
 }
 
+//type AccountPublic = <Signature as Verify>::Signer;
+
 #[async_std::main]
 async fn main() {
     let configuration =
         Configuration::from_path("config.json").expect("Failed to load configuration.");
     let mut iroha_client = Client::new(&configuration);
-    let url = "127.0.0.1:9977";
+    let url = "127.0.0.1:19944";
     let seed = "Alice";
+    //let signer = SrPair::from_string(&format!("//{}", seed), None).unwrap();
     let signer = SrPair::from_string(&format!("//{}", seed), None).unwrap();
+    //let signer = SrPair::from_string(&format!("{}//Alice", "bottom drive obey lake curtain smoke basket hold race lonely fit walk"), None).unwrap();
+    println!("before api");
     let api = Api::new(format!("ws://{}", url)).set_signer(signer);
 
     // check assets before the transfer
@@ -100,6 +108,7 @@ async fn main() {
         name: "XOR".into(),
         domain_name: global_domain_name.into(),
     });
+    //
     let iroha_transfer_xor = Transfer::new(
         user_account_id.clone(),
         Asset::with_quantity(
@@ -115,7 +124,7 @@ async fn main() {
         .expect("Failed to send request");
     println!("[BRIDGE TEST] QQ Sent Iroha->Bridge transfer transaction.");
 
-    for _ in 0..0 {
+    for _ in 0..1 {
     async_std::task::sleep(std::time::Duration::from_secs(15)).await;
     println!("[BRIDGE TEST] CU Checking account balances after the Iroha->Bridge transfer...");
 
@@ -137,6 +146,9 @@ async fn main() {
     println!("assert {} = {}", balance, 100);
     }
     //assert_eq!(balance, 100);
+    //
+
+    //
 
     // test incoming transfer
     let amount = 100u128;

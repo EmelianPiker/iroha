@@ -1,15 +1,14 @@
 //! This module contains structures and implementations related to the cryptographic parts of the
 //! Iroha.
-use crate::alloc::string::ToString;
 use alloc::collections::BTreeMap;
 use alloc::{string::String, vec::Vec};
 use core::ops::Deref;
 use core::{
-    convert::{TryFrom, TryInto},
+    convert::TryFrom,
     fmt::{self, Debug, Formatter},
 };
 use parity_scale_codec::{Decode, Encode};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 // use ursa::{
 //     blake2::{
 //         digest::{Input, VariableOutput},
@@ -35,7 +34,7 @@ pub struct KeyPair {
 
 /// Public Key used in signatures.
 #[derive(
-    Copy, Encode, Decode, Ord, PartialEq, Eq, PartialOrd, Debug, Clone, Hash, Default, Deserialize,
+    Copy, Encode, Decode, Ord, PartialEq, Eq, PartialOrd, Debug, Clone, Hash, Default, Serialize, Deserialize,
 )]
 pub struct PublicKey {
     inner: [u8; 32],
