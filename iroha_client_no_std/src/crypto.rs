@@ -24,7 +24,8 @@ use serde::{Deserialize, Serialize};
 pub type Hash = [u8; 32];
 
 /// Pair of Public and Private keys.
-#[derive(Clone, Debug, Deserialize, Default)]
+#[cfg_attr(feature = "std", derive(Deserialize))]
+#[derive(Clone, Debug, Default)]
 pub struct KeyPair {
     /// Public Key.
     pub public_key: PublicKey,
@@ -33,9 +34,8 @@ pub struct KeyPair {
 }
 
 /// Public Key used in signatures.
-#[derive(
-    Copy, Encode, Decode, Ord, PartialEq, Eq, PartialOrd, Debug, Clone, Hash, Default, Serialize, Deserialize,
-)]
+#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
+#[derive(Copy, Encode, Decode, Ord, PartialEq, Eq, PartialOrd, Debug, Clone, Hash, Default)]
 pub struct PublicKey {
     inner: [u8; 32],
 }
@@ -67,7 +67,8 @@ impl TryFrom<Vec<u8>> for PublicKey {
 }
 
 /// Private Key used in signatures.
-#[derive(Clone, Debug, Deserialize, PartialEq, Default)]
+#[cfg_attr(feature = "std", derive(Deserialize))]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct PrivateKey {
     inner: Vec<u8>,
 }
