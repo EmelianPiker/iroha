@@ -52,7 +52,8 @@ async fn main() {
     let configuration =
         Configuration::from_path("config.json").expect("Failed to load configuration.");
     let mut iroha_client = Client::new(&configuration);
-    let url = "127.0.0.1:9944";
+    // 19944 is parachain fullnode 0 port on rococo-localtestnet-script
+    let url = "127.0.0.1:19944";
     let seed = "Alice";
     let signer = SrPair::from_string(&format!("//{}", seed), None).unwrap();
     let api = Api::new(format!("ws://{}", url)).set_signer(signer);
