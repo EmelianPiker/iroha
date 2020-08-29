@@ -13,10 +13,10 @@ members = [
 #  "iroha_substrate/substrate-node-template/pallets/template",
 #  "iroha_substrate/substrate-node-template/pallets/treasury",
 #  "iroha_substrate/substrate-node-template/runtime",
-  "iroha_substrate/substrate-iroha-bridge-node/node",
-  "iroha_substrate/substrate-iroha-bridge-node/pallets/iroha-bridge",
-  "iroha_substrate/substrate-iroha-bridge-node/pallets/treasury",
-  "iroha_substrate/substrate-iroha-bridge-node/runtime",
+#  "iroha_substrate/substrate-iroha-bridge-node/node",
+#  "iroha_substrate/substrate-iroha-bridge-node/pallets/iroha-bridge",
+#  "iroha_substrate/substrate-iroha-bridge-node/pallets/treasury",
+#  "iroha_substrate/substrate-iroha-bridge-node/runtime",
 ]
 
 #[patch.'git+https://github.com/paritytech/substrate.git?tag=v2.0.0-rc4#00768a1f21a579c478fe5d4f51e1fa71f7db9fd4']

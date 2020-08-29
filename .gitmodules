@@ -1,6 +1,6 @@
-[submodule "iroha_substrate/substrate-front-end-template"]
-	path = iroha_substrate/substrate-front-end-template
-	url = https://github.com/substrate-developer-hub/substrate-front-end-template.git
-[submodule "iroha_substrate/substrate-iroha-bridge-node"]
-	path = iroha_substrate/substrate-iroha-bridge-node
-	url = https://github.com/EmelianPiker/substrate-iroha-bridge-node.git
+#[submodule "iroha_substrate/substrate-front-end-template"]
+#	path = iroha_substrate/substrate-front-end-template
+#	url = https://github.com/substrate-developer-hub/substrate-front-end-template.git
+#[submodule "iroha_substrate/substrate-iroha-bridge-node"]
+#	path = iroha_substrate/substrate-iroha-bridge-node
+#	url = https://github.com/EmelianPiker/substrate-iroha-bridge-node.git

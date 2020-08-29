@@ -52,8 +52,8 @@ async fn main() {
     let configuration =
         Configuration::from_path("config.json").expect("Failed to load configuration.");
     let mut iroha_client = Client::new(&configuration);
-    // 19944 is parachain fullnode 0 port on rococo-localtestnet-script
-    let url = "127.0.0.1:19944";
+    // 19944 - 200 = 19744 is parachain 200 fullnode 0 port on rococo-localtestnet-script
+    let url = "127.0.0.1:19744";
     let seed = "Alice";
     let signer = SrPair::from_string(&format!("//{}", seed), None).unwrap();
     let api = Api::new(format!("ws://{}", url)).set_signer(signer);
@@ -116,7 +116,7 @@ async fn main() {
         .expect("Failed to send request");
     println!("[BRIDGE TEST] Sent Iroha->Bridge transfer transaction.");
 
-    async_std::task::sleep(std::time::Duration::from_secs(15)).await;
+    async_std::task::sleep(std::time::Duration::from_secs(20)).await;
     println!("[BRIDGE TEST] Checking account balances after the Iroha->Bridge transfer...");
 
     let get_user_account = by_id(user_account_id.clone());
